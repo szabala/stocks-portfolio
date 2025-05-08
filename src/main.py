@@ -1,7 +1,5 @@
 from fastapi import FastAPI
+from src.routers import portfolio
 
 app = FastAPI()
-
-@app.get("/hello")
-def read_root():
-    return {"message": "Hello, world from Docker!"}
+app.include_router(portfolio.router)
