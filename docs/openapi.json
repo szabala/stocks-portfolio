@@ -1,0 +1,377 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "FastAPI",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/portfolio/": {
+            "post": {
+                "summary": "Create Portfolio",
+                "description": "Create a new portfolio with the specified stocks and target allocation.",
+                "operationId": "create_portfolio_portfolio__post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PortfolioInput"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortfolioOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/{portfolio_id}": {
+            "get": {
+                "summary": "Get Portfolio",
+                "description": "Retrieve a portfolio by its ID, including its current value.",
+                "operationId": "get_portfolio_portfolio__portfolio_id__get",
+                "parameters": [
+                    {
+                        "name": "portfolio_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Portfolio Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortfolioOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/{portfolio_id}/rebalance": {
+            "get": {
+                "summary": "Rebalance",
+                "description": "Retrieve which stocks should be sold and bought to align the portfolio with the target allocation.",
+                "operationId": "rebalance_portfolio__portfolio_id__rebalance_get",
+                "parameters": [
+                    {
+                        "name": "portfolio_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Portfolio Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RebalanceOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "PortfolioInput": {
+                "properties": {
+                    "stocks": {
+                        "items": {
+                            "$ref": "#/components/schemas/StockInput"
+                        },
+                        "type": "array",
+                        "title": "Stocks",
+                        "description": "List of stocks in the portfolio",
+                        "example": [
+                            {
+                                "quantity": 10,
+                                "symbol": "AAPL"
+                            },
+                            {
+                                "quantity": 5,
+                                "symbol": "GOOG"
+                            }
+                        ]
+                    },
+                    "allocation": {
+                        "additionalProperties": {
+                            "type": "number"
+                        },
+                        "type": "object",
+                        "title": "Allocation",
+                        "description": "Mapping of stock symbol to allocation percentage (values should sum to 1.0)",
+                        "example": {
+                            "AAPL": 0.5,
+                            "GOOG": 0.3,
+                            "MSFT": 0.2
+                        }
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "stocks",
+                    "allocation"
+                ],
+                "title": "PortfolioInput"
+            },
+            "PortfolioOutput": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id",
+                        "description": "Unique portfolio identifier"
+                    },
+                    "stocks": {
+                        "items": {
+                            "$ref": "#/components/schemas/StockOutput"
+                        },
+                        "type": "array",
+                        "title": "Stocks",
+                        "description": "List of stocks in the portfolio",
+                        "example": [
+                            {
+                                "quantity": 10,
+                                "symbol": "AAPL"
+                            },
+                            {
+                                "quantity": 5,
+                                "symbol": "GOOG"
+                            }
+                        ]
+                    },
+                    "allocation": {
+                        "additionalProperties": {
+                            "type": "number"
+                        },
+                        "type": "object",
+                        "title": "Allocation",
+                        "description": "Mapping of stock symbol to allocation percentage (values sum to 1.0)",
+                        "example": {
+                            "AAPL": 0.5,
+                            "GOOG": 0.3,
+                            "MSFT": 0.2
+                        }
+                    },
+                    "value": {
+                        "type": "number",
+                        "title": "Value",
+                        "description": "Total portfolio value in USD",
+                        "example": 15000.0
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "stocks",
+                    "allocation",
+                    "value"
+                ],
+                "title": "PortfolioOutput"
+            },
+            "RebalanceAction": {
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "title": "Symbol",
+                        "description": "Stock symbol to buy or sell",
+                        "example": "AAPL"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "description": "Number of shares to buy or sell",
+                        "example": 2.5
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "symbol",
+                    "quantity"
+                ],
+                "title": "RebalanceAction"
+            },
+            "RebalanceOutput": {
+                "properties": {
+                    "buy": {
+                        "items": {
+                            "$ref": "#/components/schemas/RebalanceAction"
+                        },
+                        "type": "array",
+                        "title": "Buy",
+                        "description": "List of stocks to buy with quantities",
+                        "example": [
+                            {
+                                "quantity": 2.5,
+                                "symbol": "AAPL"
+                            }
+                        ]
+                    },
+                    "sell": {
+                        "items": {
+                            "$ref": "#/components/schemas/RebalanceAction"
+                        },
+                        "type": "array",
+                        "title": "Sell",
+                        "description": "List of stocks to sell with quantities",
+                        "example": [
+                            {
+                                "quantity": 1.0,
+                                "symbol": "GOOG"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "buy",
+                    "sell"
+                ],
+                "title": "RebalanceOutput"
+            },
+            "StockInput": {
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "title": "Symbol",
+                        "description": "Stock symbol",
+                        "example": "AAPL"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "description": "Number of shares",
+                        "example": 10.0
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "symbol",
+                    "quantity"
+                ],
+                "title": "StockInput"
+            },
+            "StockOutput": {
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "title": "Symbol",
+                        "description": "Stock symbol",
+                        "example": "AAPL"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "description": "Number of shares",
+                        "example": 10.0
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "symbol",
+                    "quantity"
+                ],
+                "title": "StockOutput"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

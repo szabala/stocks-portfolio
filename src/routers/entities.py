@@ -1,19 +1,21 @@
-from pydantic import BaseModel, validator
-from typing import List, Dict, Optional
+from pydantic import BaseModel, validator, Field
+from typing import List, Dict, TypeAlias
 from domains.stock.entities import Stock
+
+Allocation: TypeAlias = Dict[str, float]
 
 
 class StockInput(BaseModel):
-    symbol: str
-    quantity: float
+    symbol: str = Field(..., example="AAPL", description="Stock symbol")
+    quantity: float = Field(..., example=10.0, description="Number of shares")
 
     def to_domain(self) -> Stock:
         return Stock(symbol=self.symbol, quantity=self.quantity)
 
 
 class StockOutput(BaseModel):
-    symbol: str
-    quantity: float
+    symbol: str = Field(..., example="AAPL", description="Stock symbol")
+    quantity: float = Field(..., example=10.0, description="Number of shares")
 
     @classmethod
     def from_domain(cls, stock: Stock) -> "StockOutput":
@@ -21,8 +23,15 @@ class StockOutput(BaseModel):
 
 
 class PortfolioInput(BaseModel):
-    stocks: List[StockInput]
-    allocation: Dict[str, float] = None
+    stocks: List[StockInput] = Field(
+        ...,
+        example=[{"symbol": "AAPL", "quantity": 10}, {"symbol": "GOOG", "quantity": 5}],
+        description="List of stocks in the portfolio",
+    )
+    allocation: Allocation = Field(
+        description="Mapping of stock symbol to allocation percentage (values should sum to 1.0)",
+        example={"AAPL": 0.5, "GOOG": 0.3, "MSFT": 0.2},
+    )
 
     def to_domain(self) -> List[Stock]:
         return [stock.to_domain() for stock in self.stocks]
@@ -48,10 +57,22 @@ class PortfolioInput(BaseModel):
 
 
 class PortfolioOutput(BaseModel):
-    id: str
-    stocks: list[StockOutput]
-    allocation: dict
-    value: float
+    id: str = Field(
+        ..., description="Unique portfolio identifier"
+    )
+    stocks: List[StockOutput] = Field(
+        ...,
+        example=[{"symbol": "AAPL", "quantity": 10}, {"symbol": "GOOG", "quantity": 5}],
+        description="List of stocks in the portfolio",
+    )
+    allocation: Allocation = Field(
+        ...,
+        description="Mapping of stock symbol to allocation percentage (values sum to 1.0)",
+        example={"AAPL": 0.5, "GOOG": 0.3, "MSFT": 0.2},
+    )
+    value: float = Field(
+        ..., example=15000.0, description="Total portfolio value in USD"
+    )
 
     @classmethod
     def from_domain(
@@ -66,13 +87,23 @@ class PortfolioOutput(BaseModel):
 
 
 class RebalanceAction(BaseModel):
-    symbol: str
-    quantity: float
+    symbol: str = Field(..., example="AAPL", description="Stock symbol to buy or sell")
+    quantity: float = Field(
+        ..., example=2.5, description="Number of shares to buy or sell"
+    )
 
 
 class RebalanceOutput(BaseModel):
-    buy: List[RebalanceAction]
-    sell: List[RebalanceAction]
+    buy: List[RebalanceAction] = Field(
+        ...,
+        example=[{"symbol": "AAPL", "quantity": 2.5}],
+        description="List of stocks to buy with quantities",
+    )
+    sell: List[RebalanceAction] = Field(
+        ...,
+        example=[{"symbol": "GOOG", "quantity": 1.0}],
+        description="List of stocks to sell with quantities",
+    )
 
     @classmethod
     def from_domain(cls, rebalance: Dict[str, float]) -> "RebalanceOutput":

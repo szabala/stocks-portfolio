@@ -15,7 +15,11 @@ portfolio_service = PortfolioService(
 )
 
 
-@router.post("/", response_model=PortfolioOutput)
+@router.post(
+    "/",
+    response_model=PortfolioOutput,
+    description="Create a new portfolio with the specified stocks and target allocation.",
+)
 def create_portfolio(data: PortfolioInput):
     stocks = data.to_domain()
     allocation = data.allocation
@@ -24,7 +28,11 @@ def create_portfolio(data: PortfolioInput):
     return PortfolioOutput.from_domain(portfolio_id, portfolio, value)
 
 
-@router.get("/{portfolio_id}", response_model=PortfolioOutput)
+@router.get(
+    "/{portfolio_id}",
+    response_model=PortfolioOutput,
+    description="Retrieve a portfolio by its ID, including its current value.",
+)
 def get_portfolio(portfolio_id: str):
     try:
         portfolio_id, portfolio = portfolio_service.get_portfolio(portfolio_id)
@@ -34,7 +42,11 @@ def get_portfolio(portfolio_id: str):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/{portfolio_id}/rebalance", response_model=RebalanceOutput)
+@router.get(
+    "/{portfolio_id}/rebalance",
+    response_model=RebalanceOutput,
+    description="Retrieve which stocks should be sold and bought to align the portfolio with the target allocation.",
+)
 def rebalance(portfolio_id: str):
     try:
         rebalance_dict = portfolio_service.rebalance_portfolio(portfolio_id)
