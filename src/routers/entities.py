@@ -9,7 +9,8 @@ class StockInput(BaseModel):
 
     def to_domain(self) -> Stock:
         return Stock(symbol=self.symbol, quantity=self.quantity)
-    
+
+
 class StockOutput(BaseModel):
     symbol: str
     quantity: float
@@ -17,6 +18,7 @@ class StockOutput(BaseModel):
     @classmethod
     def from_domain(cls, stock: Stock) -> "StockOutput":
         return cls(symbol=stock.symbol, quantity=stock.quantity)
+
 
 class PortfolioInput(BaseModel):
     stocks: List[StockInput]
@@ -52,13 +54,16 @@ class PortfolioOutput(BaseModel):
     value: float
 
     @classmethod
-    def from_domain(cls, portfolio_id: str, portfolio, value: float) -> "PortfolioOutput":
+    def from_domain(
+        cls, portfolio_id: str, portfolio, value: float
+    ) -> "PortfolioOutput":
         return cls(
             id=portfolio_id,
             stocks=[StockOutput.from_domain(s) for s in portfolio.stocks],
             allocation=portfolio.allocation,
             value=value,
         )
+
 
 class RebalanceAction(BaseModel):
     symbol: str
