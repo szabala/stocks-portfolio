@@ -25,3 +25,10 @@ Here is a brief rundown of the project structure:
 ```sh
 docker-compose up --build
 ```
+
+## Docs
+The application automatically generates OpenAPI documentation. You can access it at:
+
+- [http://localhost:8000/docs](http://localhost:8000/docs)
+
+If you don't want to run the application, you can view the API documentation in [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/szabala/stocks-portfolio/refs/heads/main/docs/openapi.json).
