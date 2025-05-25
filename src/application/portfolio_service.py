@@ -18,13 +18,11 @@ class PortfolioService:
         portfolio = Portfolio(stocks, allocation)
         portfolio_id = str(uuid.uuid4())
         self.repository.save(portfolio_id, portfolio)
-        return {"portfolio_id": portfolio_id}
+        return portfolio_id, portfolio
 
     def get_portfolio(self, portfolio_id: str):
-        return self.repository.get(portfolio_id)
-
-    def get_portfolio_value(self, portfolio_id: str):
-        return self.repository.get(portfolio_id).value(self.price_provider)
+        portfolio = self.repository.get(portfolio_id)
+        return portfolio_id, portfolio
 
     def rebalance_portfolio(self, portfolio_id: str):
         return self.repository.get(portfolio_id).rebalance()

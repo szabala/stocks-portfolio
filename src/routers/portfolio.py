@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from application.portfolio_service import PortfolioService
 from exceptions.domain import RebalanceError
 from exceptions.infrastructure import NotFoundError
-from routers.entities import PortfolioInput, RebalanceOutput
+from routers.entities import PortfolioInput, PortfolioOutput, RebalanceOutput
 from infrastructure.memory_portfolio_repository import MemoryPortfolioRepository
 from infrastructure.stock_price_provider import DummyStockPriceProvider
 
@@ -15,17 +15,21 @@ portfolio_service = PortfolioService(
 )
 
 
-@router.post("/")
+@router.post("/", response_model=PortfolioOutput)
 def create_portfolio(data: PortfolioInput):
     stocks = data.to_domain()
     allocation = data.allocation
-    return portfolio_service.create_portfolio(stocks, allocation)
+    portfolio_id, portfolio = portfolio_service.create_portfolio(stocks, allocation)
+    value = portfolio.value(portfolio_service.price_provider)
+    return PortfolioOutput.from_domain(portfolio_id, portfolio, value)
 
 
-@router.get("/{portfolio_id}")
+@router.get("/{portfolio_id}", response_model=PortfolioOutput)
 def get_portfolio(portfolio_id: str):
     try:
-        return portfolio_service.get_portfolio(portfolio_id)
+        portfolio_id, portfolio = portfolio_service.get_portfolio(portfolio_id)
+        value = portfolio.value(portfolio_service.price_provider)
+        return PortfolioOutput.from_domain(portfolio_id, portfolio, value)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

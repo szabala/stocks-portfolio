@@ -4,7 +4,7 @@ from exceptions.domain import RebalanceError
 
 
 class Portfolio:
-    def __init__(self, stocks: List[Stock], allocation: Dict[str, float] = {}):
+    def __init__(self, stocks: List[Stock], allocation: Dict[str, float]):
         self.stocks = stocks
         self.allocation = allocation
 
