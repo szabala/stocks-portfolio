@@ -21,9 +21,20 @@ Here is a brief rundown of the project structure:
 - `exceptions/`: Custom exception classes.
 
 ## How to Run
+### Application
+To run the application, you can use Docker. Make sure you have Docker and Docker Compose installed on your machine.
 
 ```sh
 docker-compose up --build
+```
+
+This will start the FastAPI application on `http://localhost:8000`.
+
+### Tests
+This project uses `pytest` for unit testing. You can run the tests with:
+
+```sh
+pytest
 ```
 
 ## Docs

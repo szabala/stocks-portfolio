@@ -2,7 +2,6 @@ from ports.stock_price_port import StockPricePort
 from .entities import Stock
 from typing import List, Dict
 from exceptions.domain import RebalanceError
-from datetime import date
 
 
 class Portfolio:
@@ -31,7 +30,10 @@ class Portfolio:
                 stock_map[symbol] = Stock(symbol=symbol, quantity=0)
 
         # Get current prices using Stock.current_price
-        prices = {symbol: stock_map[symbol].current_price(price_provider) for symbol in symbols}
+        prices = {
+            symbol: stock_map[symbol].current_price(price_provider)
+            for symbol in symbols
+        }
 
         # Calculate current value for each stock in portfolio
         current_shares = {symbol: stock_map[symbol].quantity for symbol in symbols}
