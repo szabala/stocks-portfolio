@@ -1,5 +1,6 @@
 from ports.portfolio_repository_port import PortfolioRepositoryPort
 from domains.stock.aggregates import Portfolio
+from exceptions.infrastructure import NotFoundError
 
 
 class MemoryPortfolioRepository(PortfolioRepositoryPort):
@@ -10,4 +11,7 @@ class MemoryPortfolioRepository(PortfolioRepositoryPort):
         self._store[portfolio_id] = portfolio
 
     def get(self, portfolio_id: str) -> Portfolio:
-        return self._store.get(portfolio_id)
+        portfolio = self._store.get(portfolio_id)
+        if portfolio is None:
+            raise NotFoundError(f"Portfolio '{portfolio_id}' not found.")
+        return portfolio

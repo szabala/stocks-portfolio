@@ -1,22 +1,35 @@
 from .entities import Stock
-from typing import List
-from datetime import date
+from typing import List, Dict
+from exceptions.domain import RebalanceError
 
 
 class Portfolio:
-    def __init__(self, stocks: List[Stock]):
+    def __init__(self, stocks: List[Stock], allocation: Dict[str, float] = {}):
         self.stocks = stocks
+        self.allocation = allocation
 
-    def calculate_profit(self, start_date: date, end_date: date, provider):
-        total_start = sum(
-            s.price(start_date, provider) * s.quantity for s in self.stocks
+    def value(self, price_provider) -> float:
+        return sum(
+            stock.quantity * stock.current_price(price_provider)
+            for stock in self.stocks
         )
-        total_end = sum(s.price(end_date, provider) * s.quantity for s in self.stocks)
-        profit = total_end - total_start
-        duration_years = (end_date - start_date).days / 365.25
-        annualized = (
-            ((total_end / total_start) ** (1 / duration_years) - 1)
-            if duration_years > 0 and total_start > 0
-            else 0
-        )
-        return {"profit": profit, "annualized_return": annualized}
+
+    def rebalance(self) -> Dict[str, float]:
+        if not self.allocation:
+            raise RebalanceError("No allocation provided for rebalancing.")
+
+        total_shares = sum(stock.quantity for stock in self.stocks)
+        if total_shares == 0:
+            raise RebalanceError("No shares in portfolio to rebalance.")
+
+        target_shares = {
+            symbol: total_shares * weight for symbol, weight in self.allocation.items()
+        }
+        current_shares = {stock.symbol: stock.quantity for stock in self.stocks}
+
+        rebalance = {
+            symbol: target_shares[symbol] - current_shares.get(symbol, 0)
+            for symbol in self.allocation
+        }
+
+        return rebalance

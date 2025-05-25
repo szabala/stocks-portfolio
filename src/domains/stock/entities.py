@@ -8,5 +8,5 @@ class Stock:
     symbol: str
     quantity: float
 
-    def price(self, d: date, provider: StockPricePort) -> float:
-        return provider.get_price(self.symbol, d)
+    def current_price(self, provider: StockPricePort) -> float:
+        return provider.get_price(self.symbol, date.today())

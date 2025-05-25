@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from application.portfolio_service import PortfolioService
-from routers.entities import PortfolioInput, ProfitInput
+from exceptions.domain import RebalanceError
+from exceptions.infrastructure import NotFoundError
+from routers.entities import PortfolioInput, RebalanceOutput
 from infrastructure.memory_portfolio_repository import MemoryPortfolioRepository
 from infrastructure.stock_price_provider import DummyStockPriceProvider
 
@@ -16,19 +18,24 @@ portfolio_service = PortfolioService(
 @router.post("/")
 def create_portfolio(data: PortfolioInput):
     stocks = data.to_domain()
-    return portfolio_service.create_portfolio(stocks)
+    allocation = data.allocation
+    return portfolio_service.create_portfolio(stocks, allocation)
 
 
 @router.get("/{portfolio_id}")
 def get_portfolio(portfolio_id: str):
-    portfolio = portfolio_service.get_portfolio(portfolio_id)
-    if not portfolio:
-        raise HTTPException(status_code=404, detail="Portfolio not found")
-    return portfolio
+    try:
+        return portfolio_service.get_portfolio(portfolio_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{portfolio_id}/profit")
-def calculate_profit(portfolio_id: str, data: ProfitInput):
-    return portfolio_service.calculate_profit(
-        portfolio_id, data.start_date, data.end_date
-    )
+@router.get("/{portfolio_id}/rebalance", response_model=RebalanceOutput)
+def rebalance(portfolio_id: str):
+    try:
+        rebalance_dict = portfolio_service.rebalance_portfolio(portfolio_id)
+        return RebalanceOutput.from_domain(rebalance_dict)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except RebalanceError as e:
+        raise HTTPException(status_code=400, detail=str(e))

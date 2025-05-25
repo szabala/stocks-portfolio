@@ -14,8 +14,8 @@ class PortfolioService:
         self.price_provider = price_provider
         self.repository = repository
 
-    def create_portfolio(self, stocks: list[Stock]):
-        portfolio = Portfolio(stocks)
+    def create_portfolio(self, stocks: list[Stock], allocation: dict = None):
+        portfolio = Portfolio(stocks, allocation)
         portfolio_id = str(uuid.uuid4())
         self.repository.save(portfolio_id, portfolio)
         return {"portfolio_id": portfolio_id}
@@ -23,8 +23,8 @@ class PortfolioService:
     def get_portfolio(self, portfolio_id: str):
         return self.repository.get(portfolio_id)
 
-    def calculate_profit(self, portfolio_id: str, start_date: str, end_date: str):
-        portfolio = self.repository.get(portfolio_id)
-        if not portfolio:
-            raise ValueError("Portfolio not found")
-        return portfolio.calculate_profit(start_date, end_date, self.price_provider)
+    def get_portfolio_value(self, portfolio_id: str):
+        return self.repository.get(portfolio_id).value(self.price_provider)
+
+    def rebalance_portfolio(self, portfolio_id: str):
+        return self.repository.get(portfolio_id).rebalance()
