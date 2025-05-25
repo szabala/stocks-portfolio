@@ -25,4 +25,4 @@ class PortfolioService:
         return portfolio_id, portfolio
 
     def rebalance_portfolio(self, portfolio_id: str):
-        return self.repository.get(portfolio_id).rebalance()
+        return self.repository.get(portfolio_id).rebalance(self.price_provider)
